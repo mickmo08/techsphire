@@ -73,7 +73,7 @@
         );
         const body = encodeURIComponent(
           `Name: ${data.get("name")}\nEmail: ${data.get("email")}\nCompany: ${data.get("company") || "-"}\n` +
-            `Service: ${data.get("service") || "-"}\nBudget: ${data.get("budget") || "-"}\n\n${data.get("message")}`
+            `Service: ${data.get("service") || "-"}\nUsers: ${data.get("users") || "-"}\n\n${data.get("message")}`
         );
         window.location.href = `mailto:${to}?subject=${subject}&body=${body}`;
         setStatus("Opening your email app to send the message…", true);
