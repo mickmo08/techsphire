@@ -8,12 +8,33 @@ import pathlib
 from urllib.parse import quote
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
+import sys
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+from insights import ARTICLES  # noqa: E402
 
-EMAIL = "hello@techsphire.com"
-SUPPORT = "support@techsphire.com"
-CAREERS = "careers@techsphire.com"
-PHONE, TEL = "+1 (000) 000-0000", "+10000000000"
-SHAPES = '<div class="shapes" aria-hidden="true"><span></span><span></span><span></span></div>'
+# ---------------------------------------------------------------------------
+# Company details. Fill these in — empty values are simply hidden on the site.
+# ---------------------------------------------------------------------------
+COMPANY = {
+    "name": "TechSphire",
+    "legal_name": "TechSphire",                      # e.g. "TechSphire Technologies Pvt. Ltd."
+    "tagline": "IT services &amp; consulting for ambitious enterprises",
+    "email": "hello@techsphire.com",
+    "support_email": "support@techsphire.com",
+    "careers_email": "careers@techsphire.com",
+    "phone": "",                                     # e.g. "+91 40 1234 5678"
+    "phone_link": "",                                # e.g. "+914012345678"
+    "address": [],                                   # e.g. ["Level 5, Cyber Towers", "Hitec City", "Hyderabad 500081, India"]
+    "hours": "Monday – Friday, 9:00 am – 6:00 pm",
+    "social": {"LinkedIn": "", "X": "", "Facebook": "", "YouTube": ""},  # full profile URLs
+    "leaders": [],                                   # e.g. [("Full Name", "Chief Executive Officer", "assets/img/people/name.jpg")]
+}
+SITE_URL = "https://www.techsphire.com"              # your live domain, no trailing slash
+
+EMAIL = COMPANY["email"]
+SUPPORT = COMPANY["support_email"]
+CAREERS = COMPANY["careers_email"]
+SHAPES = ""
 
 
 def icon(d):
@@ -180,8 +201,9 @@ PLATFORMS = ["Microsoft", "AWS", "Google Cloud", "SAP", "Oracle", "Salesforce",
 
 
 # --------------------------------------------------------------------------- layout
-def head(title, desc):
+def head(title, desc, path="index.html"):
     t, d = html.escape(title, quote=True), html.escape(desc, quote=True)
+    url = f"{SITE_URL}/{'' if path == 'index.html' else path}"
     return f"""<!doctype html>
 <html lang="en" class="no-js">
 <head>
@@ -189,15 +211,18 @@ def head(title, desc):
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{t}</title>
   <meta name="description" content="{d}">
+  <link rel="canonical" href="{url}">
+  <meta property="og:site_name" content="{COMPANY['name']}">
   <meta property="og:title" content="{t}">
   <meta property="og:description" content="{d}">
   <meta property="og:type" content="website">
+  <meta property="og:url" content="{url}">
+  <meta property="og:image" content="{SITE_URL}/assets/img/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
   <meta name="theme-color" content="#0f2130">
   <link rel="icon" href="assets/img/logo-small.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="preload" href="assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="assets/css/styles.css">
 </head>
 <body>
@@ -216,11 +241,11 @@ def mega_menu():
         cols.append(f'<div>{"".join(groups)}</div>')
     promo = """<div class="mega-promo">
                 <img src="assets/img/photos/px-ai.webp" alt="" loading="lazy" width="260" height="130">
-                <div><strong>Free AI Readiness Assessment</strong><p>Find the AI use cases that will move the needle for your business — in two weeks.</p><a href="contact.html">Book your assessment →</a></div>
+                <div><strong>AI Readiness Assessment</strong><p>Identify the AI use cases with the strongest business case for your organisation.</p><a href="contact.html">Request an assessment →</a></div>
               </div>"""
     return f"""<div class="mega">
             <div class="container mega-grid">{"".join(cols)}{promo}</div>
-            <div class="mega-foot"><div class="container"><span>{len(PRACTICES)} practice areas · {TOTAL_SERVICES} specialist services · one accountable partner</span><a href="contact.html">Not sure where to start? Talk to an expert →</a></div></div>
+            <div class="mega-foot"><div class="container"><span>Advisory, implementation and managed services across {len(PRACTICES)} practice areas</span><a href="contact.html">Not sure where to start? Talk to an expert →</a></div></div>
           </div>"""
 
 
@@ -238,20 +263,22 @@ def header(current):
     ind_menu = '<div class="dropdown">' + "".join(
         f'<a href="industries.html#{k}">{n}</a>' for k, n, *_ in INDUSTRIES) + \
         '<a href="industries.html" style="color:var(--brand)">All industries →</a></div>'
-    about_menu = dropdown([
+    about_items = [
         ("about.html", "About TechSphire", "Our story, mission and values"),
         ("about.html#approach", "Our approach", "Advise, build and run"),
-        ("about.html#leadership", "Leadership", "Meet the team"),
-        ("careers.html", "Careers", "Join our team"),
-    ])
-    careers_cur = ' aria-current="page"' if current == "careers.html" else ""
+    ]
+    if COMPANY["leaders"]:
+        about_items.append(("about.html#leadership", "Leadership", "Meet the team"))
+    about_items += [("insights.html", "Insights", "Perspectives from our experts"), ("careers.html", "Careers", "Join our team")]
+    cur = lambda page: ' aria-current="page"' if current == page or (page == "insights.html" and current.startswith("insight-")) else ""
+    phone = f'<a href="tel:{COMPANY["phone_link"]}">{COMPANY["phone"]}</a>' if COMPANY["phone"] else ""
     return f"""
   <div class="topbar">
     <div class="container">
-      <span>IT services &amp; consulting for ambitious enterprises</span>
+      <span>{COMPANY["tagline"]}</span>
       <nav aria-label="Utility">
-        <a href="mailto:{EMAIL}">{EMAIL}</a>
-        <a href="tel:{TEL}">{PHONE}</a>
+        <a href="mailto:{COMPANY["email"]}">{COMPANY["email"]}</a>
+        {phone}
         <a href="careers.html">Careers</a>
         <a href="contact.html#support">Client support</a>
       </nav>
@@ -260,7 +287,7 @@ def header(current):
 
   <header class="site-header">
     <nav class="container nav" aria-label="Main">
-      <a class="logo" href="index.html"><img src="assets/img/logo-small.svg" alt="" width="38" height="38"><span>Tech<b>Sphire</b></span></a>
+      <a class="logo" href="index.html" aria-label="{COMPANY["name"]} home"><img src="assets/img/logo-small.svg" alt="" width="38" height="38"><span>Tech<b>Sphire</b></span></a>
       <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false" aria-controls="nav-links">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
       </button>
@@ -273,11 +300,12 @@ def header(current):
           {trigger("Industries", current == "industries.html")}
           {ind_menu}
         </li>
+        <li><a href="insights.html"{cur("insights.html")}>Insights</a></li>
         <li class="has-drop small">
           {trigger("About", current == "about.html")}
-          {about_menu}
+          {dropdown(about_items)}
         </li>
-        <li><a href="careers.html"{careers_cur}>Careers</a></li>
+        <li><a href="careers.html"{cur("careers.html")}>Careers</a></li>
         <li class="nav-cta"><a class="btn btn-primary" href="contact.html">Contact Us</a></li>
       </ul>
     </nav>
@@ -287,27 +315,33 @@ def header(current):
 """
 
 
-SOCIAL = {
+SOCIAL_ICONS = {
     "LinkedIn": '<path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/>',
     "X": '<path d="M4 4l16 16M20 4 4 20"/>',
     "Facebook": '<path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>',
     "YouTube": '<path d="M22.5 6.4a2.8 2.8 0 0 0-2-2C18.8 4 12 4 12 4s-6.8 0-8.5.4a2.8 2.8 0 0 0-2 2A29 29 0 0 0 1 12a29 29 0 0 0 .5 5.6 2.8 2.8 0 0 0 2 2c1.7.4 8.5.4 8.5.4s6.8 0 8.5-.4a2.8 2.8 0 0 0 2-2A29 29 0 0 0 23 12a29 29 0 0 0-.5-5.6z"/><path d="m10 15 5-3-5-3z"/>',
 }
-social = "".join(f'<a href="#" aria-label="{n}">{icon(d)}</a>' for n, d in SOCIAL.items())
+social = "".join(f'<a href="{url}" aria-label="{n}" rel="noopener" target="_blank">{icon(SOCIAL_ICONS[n])}</a>'
+                 for n, url in COMPANY["social"].items() if url and n in SOCIAL_ICONS)
+social_block = f'<div class="social">{social}</div>' if social else ""
 foot_services = "".join(f'<li><a href="services.html#{k}">{t}</a></li>' for k, t, *_ in PRACTICES)
 foot_ind = "".join(f'<li><a href="industries.html#{k}">{n}</a></li>' for k, n, *_ in INDUSTRIES[:7])
+foot_phone = f'<li><a href="tel:{COMPANY["phone_link"]}">{COMPANY["phone"]}</a></li>' if COMPANY["phone"] else ""
+foot_leaders = '<li><a href="about.html#leadership">Leadership</a></li>' if COMPANY["leaders"] else ""
+mobile_first = (f'<a class="btn btn-ghost" href="tel:{COMPANY["phone_link"]}">Call us</a>' if COMPANY["phone"]
+                else f'<a class="btn btn-ghost" href="mailto:{COMPANY["email"]}">Email us</a>')
 
 FOOTER = f"""  </main>
 
   <footer class="site-footer">
     <div class="footer-top">
       <div class="container">
-        <h2>Let's build the <span class="grad-text">intelligent enterprise</span> together.</h2>
+        <h2>Let's build what's next for your business.</h2>
         <!-- Add data-endpoint="https://formspree.io/f/your-id" to collect sign-ups directly. -->
-        <form class="newsletter" id="newsletter" data-email="{EMAIL}" novalidate>
-          <label for="nl-email">Get insights on AI, cloud and security in your inbox</label>
+        <form class="newsletter" id="newsletter" data-email="{COMPANY["email"]}" novalidate>
+          <label for="nl-email">Subscribe to TechSphire Insights</label>
           <div class="nl-row">
-            <input id="nl-email" name="email" type="email" placeholder="Your work email" autocomplete="email" required>
+            <input id="nl-email" name="email" type="email" placeholder="Work email address" autocomplete="email" required>
             <button class="btn btn-primary" type="submit">Subscribe</button>
           </div>
           <p class="nl-status" role="status" aria-live="polite"></p>
@@ -317,9 +351,9 @@ FOOTER = f"""  </main>
     <div class="footer-main">
       <div class="container footer-grid wide">
         <div class="footer-brand">
-          <a class="logo" href="index.html"><img src="assets/img/logo-small.svg" alt="" width="38" height="38"><span>Tech<b>Sphire</b></span></a>
-          <p>IT services &amp; consulting for ambitious enterprises</p>
-          <div class="social">{social}</div>
+          <a class="logo" href="index.html" aria-label="{COMPANY["name"]} home"><img src="assets/img/logo-small.svg" alt="" width="38" height="38"><span>Tech<b>Sphire</b></span></a>
+          <p>{COMPANY["tagline"]}</p>
+          {social_block}
         </div>
         <div>
           <h4>Services</h4>
@@ -333,7 +367,8 @@ FOOTER = f"""  </main>
           <h4>Company</h4>
           <ul>
             <li><a href="about.html">About us</a></li>
-            <li><a href="about.html#leadership">Leadership</a></li>
+            {foot_leaders}
+            <li><a href="insights.html">Insights</a></li>
             <li><a href="careers.html">Careers</a></li>
             <li><a href="contact.html">Contact</a></li>
           </ul>
@@ -341,8 +376,8 @@ FOOTER = f"""  </main>
         <div>
           <h4>Get in touch</h4>
           <ul>
-            <li><a href="mailto:{EMAIL}">{EMAIL}</a></li>
-            <li><a href="tel:{TEL}">{PHONE}</a></li>
+            <li><a href="mailto:{COMPANY["email"]}">{COMPANY["email"]}</a></li>
+            {foot_phone}
             <li><a href="contact.html#support">Client support</a></li>
           </ul>
         </div>
@@ -350,14 +385,14 @@ FOOTER = f"""  </main>
     </div>
     <div class="footer-bottom">
       <div class="container">
-        <span>© <span data-year>2026</span> TechSphire. All rights reserved.</span>
-        <nav aria-label="Legal"><a href="privacy.html">Privacy Policy</a><a href="contact.html">Contact</a></nav>
+        <span>© <span data-year>2026</span> {COMPANY["legal_name"]}. All rights reserved.</span>
+        <nav aria-label="Legal"><a href="privacy.html">Privacy Policy</a><a href="terms.html">Terms of Use</a><a href="contact.html">Contact</a></nav>
       </div>
     </div>
   </footer>
 
   <div class="mobile-cta">
-    <a class="btn btn-ghost" href="tel:{TEL}">Call us</a>
+    {mobile_first}
     <a class="btn btn-primary" href="contact.html">Talk to an expert</a>
   </div>
 
@@ -381,25 +416,12 @@ def page_hero(crumb, eyebrow, h1, p, photo=None):
 """
 
 
-CTA_BG = """<div class="cta-bg" aria-hidden="true">
-            <div class="bar"><i></i><i></i><i></i></div>
-            <table>
-              <tr><th>Ticket</th><th>Request</th><th>Priority</th><th>Status</th></tr>
-              <tr><td>#1042</td><td>New starter laptop &amp; accounts</td><td>Normal</td><td>Resolved</td></tr>
-              <tr><td>#1041</td><td>VPN access for remote team</td><td>High</td><td>Resolved</td></tr>
-              <tr><td>#1040</td><td>Microsoft 365 licence change</td><td>Normal</td><td>Resolved</td></tr>
-              <tr><td>#1039</td><td>Firewall rule update</td><td>High</td><td>Resolved</td></tr>
-              <tr><td>#1038</td><td>Monthly backup restore test</td><td>Normal</td><td>Passed</td></tr>
-            </table>
-          </div>"""
-
-
 def cta(h, p, label, extra=""):
     return f"""
     <section class="section" style="padding-top:24px">
       <div class="container">
-        <div class="cta reveal">
-          {CTA_BG}
+        <div class="cta photo-cta reveal">
+          <div class="cta-photo" style="background-image:url(assets/img/photos/hero-consulting.webp)" aria-hidden="true"></div>
           <h2>{h}</h2>
           <p>{p}</p>
           <div class="hero-actions">
@@ -420,8 +442,12 @@ def section_head(eyebrow, h2, p="", center=True):
 """
 
 
+SITEMAP = []
+
+
 def write(name, title, desc, body):
-    (ROOT / name).write_text(head(title, desc) + header(name) + body + FOOTER)
+    SITEMAP.append(name)
+    (ROOT / name).write_text(head(title, desc, name) + header(name) + body + FOOTER)
 
 
 def ind_card(k, n, color, d, desc, bullets, link=True):
@@ -445,6 +471,23 @@ def ind_card(k, n, color, d, desc, bullets, link=True):
 
 
 # --------------------------------------------------------------------------- home
+def fmt_date(d):
+    import datetime
+    return datetime.date.fromisoformat(d).strftime("%-d %B %Y")
+
+
+def insight_cards(items):
+    return "\n".join(f"""          <a class="insight-card reveal" href="insight-{a['slug']}.html">
+            <div class="ic-img"><img src="assets/img/photos/{a['image']}.webp" alt="" loading="lazy" width="1000" height="680"></div>
+            <div class="ic-text">
+              <span class="ic-meta">{a['category'].replace('&', '&amp;')} · {fmt_date(a['date'])}</span>
+              <h3>{a['title']}</h3>
+              <p>{a['summary']}</p>
+              <span class="more">Read article →</span>
+            </div>
+          </a>""" for a in items)
+
+
 FEATURED = {"ai", "cloud"}
 ORDER = ["ai", "erp", "digital", "data", "consulting", "cloud", "managed", "security", "gcc", "engineering"]
 
@@ -498,16 +541,6 @@ why = "\n".join(f"""          <div class="feature reveal">
             <h3>{t}</h3>
             <p>{p}</p>
           </div>""" for d, t, p in WHY)
-
-ROWS = [("Infrastructure & cloud", "reviewed"), ("Applications & data", "mapped"), ("Security posture", "scored"),
-        ("AI & automation readiness", "assessed"), ("Cost optimisation", "identified")]
-term_rows = "".join(f'  <span class="t-ok">✓</span> {l.ljust(29).replace("&", "&amp;")}<span class="t-dim">{v}</span>\n' for l, v in ROWS)
-TERMINAL = f"""<div class="terminal reveal" role="img" aria-label="Example IT assessment: infrastructure, applications, security, AI readiness and costs reviewed; roadmap ready.">
-<pre><span class="t-dim">$</span> <span class="t-cmd">techsphire</span> assess <span class="t-dim">--org</span> <span class="t-str">"your-enterprise"</span>
-
-{term_rows}
-<span class="t-acc">→</span> Your transformation roadmap is ready.</pre>
-        </div>"""
 
 SLIDES = [
     (None, "Intelligent enterprise", "IT services &amp; consulting",
@@ -625,10 +658,10 @@ home = f"""    <section class="hero-slider show-globe" data-slider aria-roledesc
 
     <section class="stats-band">
       <div class="container">
-        <div class="stat"><strong data-count="{len(PRACTICES)}">{len(PRACTICES)}</strong><span>Practice areas</span></div>
-        <div class="stat"><strong data-count="{TOTAL_SERVICES}">{TOTAL_SERVICES}</strong><span>Specialist services</span></div>
-        <div class="stat"><strong>24/7</strong><span>Global operations &amp; support</span></div>
-        <div class="stat"><strong data-count="{len(INDUSTRIES)}">{len(INDUSTRIES)}</strong><span>Industries served</span></div>
+        <div class="stat"><strong>24/7</strong><span>Monitoring, support and incident response</span></div>
+        <div class="stat"><strong>1 day</strong><span>Response to every new enquiry</span></div>
+        <div class="stat"><strong data-count="100" data-suffix="%">100%</strong><span>Client ownership of code and IP</span></div>
+        <div class="stat"><strong data-count="{len(PRACTICES)}">{len(PRACTICES)}</strong><span>Practice areas, one accountable partner</span></div>
       </div>
     </section>
 
@@ -681,7 +714,7 @@ home = f"""    <section class="hero-slider show-globe" data-slider aria-roledesc
     <section class="section">
       <div class="container spotlight">
         <div class="reveal">
-          <span class="eyebrow">Free enterprise IT assessment</span>
+          <span class="eyebrow">Enterprise IT assessment</span>
           <h2>Know exactly where you stand — and what to do next</h2>
           <p style="color:var(--muted);font-size:1.1rem">Our consultants review your infrastructure, applications, data, security and AI readiness, then deliver a prioritised roadmap with clear costs and quick wins.</p>
           <ul class="checklist">
@@ -689,9 +722,20 @@ home = f"""    <section class="hero-slider show-globe" data-slider aria-roledesc
             <li>Risk, cost and opportunity scoring</li>
             <li>A 90-day action plan and long-term roadmap</li>
           </ul>
-          <div class="hero-actions" style="justify-content:flex-start"><a class="btn btn-primary" style="border-radius:999px" href="contact.html">Request your assessment</a></div>
+          <div class="hero-actions" style="justify-content:flex-start"><a class="btn btn-primary" href="contact.html">Request an assessment</a></div>
         </div>
-        {TERMINAL}
+        <div class="spot-visual reveal">
+          <img src="assets/img/photos/page-about.webp" alt="Consultants reviewing an IT assessment" loading="lazy" width="1920" height="800">
+          <div class="spot-card">
+            <strong>What you receive</strong>
+            <ul class="checklist">
+              <li>Current-state review of your landscape</li>
+              <li>Risk and maturity scorecard</li>
+              <li>Prioritised 90-day action plan</li>
+              <li>Costed multi-year roadmap</li>
+            </ul>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -705,6 +749,18 @@ home = f"""    <section class="hero-slider show-globe" data-slider aria-roledesc
 
     <section class="section">
       <div class="container">
+        <div class="section-split reveal">
+          <div><span class="eyebrow">Insights</span><h2>Perspectives from our experts</h2></div>
+          <a class="btn btn-soft" href="insights.html">View all insights</a>
+        </div>
+        <div class="insight-grid stagger">
+{insight_cards(ARTICLES[:3])}
+        </div>
+      </div>
+    </section>
+
+    <section class="section section-alt">
+      <div class="container">
 {section_head("FAQ", "Frequently asked questions")}        <div class="faq reveal">
 {faq}
         </div>
@@ -713,6 +769,16 @@ home = f"""    <section class="hero-slider show-globe" data-slider aria-roledesc
 {cta("Ready to build your intelligent enterprise?", "Talk to our experts about your goals. We'll respond within one business day to arrange a free consultation.", "Talk to an expert")}"""
 
 
+import json
+ORG_LD = json.dumps({
+    "@context": "https://schema.org", "@type": "Organization", "name": COMPANY["name"],
+    "url": SITE_URL, "logo": f"{SITE_URL}/assets/img/logo-512.png", "email": COMPANY["email"],
+    **({"telephone": COMPANY["phone"]} if COMPANY["phone"] else {}),
+    "sameAs": [u for u in COMPANY["social"].values() if u],
+})
+home += f"""
+    <script type="application/ld+json">{ORG_LD}</script>
+"""
 write("index.html", "TechSphire — IT Services & Consulting for the Intelligent Enterprise",
       "TechSphire is an IT services and consulting company: enterprise applications, digital transformation, data & AI, cloud, cyber security, managed services and more.",
       home)
@@ -794,6 +860,40 @@ def value(ic, t, p):
           </div>"""
 
 
+def leadership_section():
+    if COMPANY["leaders"]:
+        cards = "\n".join(f"""          <div class="leader reveal">
+            <img src="{photo}" alt="{name}" loading="lazy" width="400" height="480">
+            <h3>{name}</h3>
+            <p>{role}</p>
+          </div>""" for name, role, photo in COMPANY["leaders"])
+        return f"""
+    <section class="section section-alt" id="leadership" style="scroll-margin-top:80px">
+      <div class="container">
+{section_head("Leadership", "Meet our leadership team")}        <div class="grid grid-3 stagger">
+{cards}
+        </div>
+      </div>
+    </section>"""
+    return f"""
+    <section class="section section-alt" id="people" style="scroll-margin-top:80px">
+      <div class="container split">
+        <div class="story-img reveal"><img src="assets/img/photos/page-careers.webp" alt="TechSphire team collaborating" loading="lazy" width="1920" height="800"></div>
+        <div class="reveal">
+          <span class="eyebrow">Our people</span>
+          <h2>Senior expertise on every engagement</h2>
+          <p>Our teams bring together management consultants, enterprise architects, software and cloud engineers, data scientists and security specialists. Every engagement is led by experienced practitioners who stay involved from the first workshop to go-live and beyond.</p>
+          <ul class="checklist">
+            <li>Certified across SAP, Microsoft, AWS, Google Cloud, ServiceNow and leading security platforms</li>
+            <li>Continuous investment in training and certification</li>
+            <li>Delivery teams sized to the outcome, not the headcount</li>
+          </ul>
+          <div class="hero-actions" style="justify-content:flex-start"><a class="btn btn-primary" href="careers.html">Join our team</a></div>
+        </div>
+      </div>
+    </section>"""
+
+
 def person(initials, name, role):
     return f"""          <div class="card reveal" style="text-align:center">
             <div class="icon" style="margin:0 auto 18px;width:88px;height:88px;border-radius:50%;font-size:1.6rem;font-weight:800">{initials}</div>
@@ -863,15 +963,7 @@ about = page_hero("About", "About TechSphire", "Your partner for the intelligent
       </div>
     </section>
 
-    <section class="section section-alt" id="leadership" style="scroll-margin-top:80px">
-      <div class="container">
-{section_head("Leadership", "Meet our leadership team", "Replace these placeholders with your leadership team's names, roles and photos.")}        <div class="grid grid-3 stagger">
-{person("AB", "Your Name", "Founder &amp; Chief Executive Officer")}
-{person("CD", "Team Member", "Chief Technology Officer")}
-{person("EF", "Team Member", "Head of Consulting &amp; Delivery")}
-        </div>
-      </div>
-    </section>
+{leadership_section()}
 {cta("Want to work with us?", "Whether you're a potential client or a future teammate, we'd love to hear from you.", "Contact us", chr(10) + '            <a class="btn btn-ghost" href="careers.html">View careers</a>')}"""
 
 write("about.html", "About us — TechSphire",
@@ -924,7 +1016,7 @@ careers = page_hero("Careers", "Careers", "Build what's next with TechSphire",
 
     <section class="section section-alt">
       <div class="container">
-{section_head("Open roles", "Current openings", "Update this list as roles open and close.", center=False)}        <div class="grid grid-2 stagger">
+{section_head("Open roles", "Current openings", "We're hiring across our practices. Send your CV and a short note about the role that interests you.", center=False)}        <div class="grid grid-2 stagger">
 {chr(10).join(role(t, m) for t, m in ROLES)}
         </div>
         <p class="reveal" style="margin-top:32px;text-align:center">Don't see the right role? Send your CV to <a href="mailto:{CAREERS}">{CAREERS}</a> — we're always happy to meet talented people.</p>
@@ -937,6 +1029,29 @@ write("careers.html", "Careers — TechSphire",
       careers)
 
 # --------------------------------------------------------------------------- contact
+def contact_cards():
+    out = []
+    if COMPANY["phone"]:
+        out.append(f"""          <div class="card reveal">
+            <h3>Phone</h3>
+            <p><a href="tel:{COMPANY['phone_link']}">{COMPANY['phone']}</a></p>
+          </div>""")
+    if COMPANY["address"]:
+        out.append(f"""          <div class="card reveal">
+            <h3>Headquarters</h3>
+            <p>{"<br>".join(COMPANY['address'])}</p>
+          </div>""")
+    out.append(f"""          <div class="card reveal">
+            <h3>Business hours</h3>
+            <p>{COMPANY['hours']}<br>24/7 support for managed services clients</p>
+          </div>
+          <div class="card reveal">
+            <h3>Careers</h3>
+            <p><a href="mailto:{CAREERS}">{CAREERS}</a></p>
+          </div>""")
+    return "\n".join(out)
+
+
 options = "\n".join(f"                <option>{t}</option>" for _, t, *_ in PRACTICES)
 contact = page_hero("Contact", "Contact us", "Let's talk about your goals",
                     "Book a free consultation, request a proposal or get support — we'll respond within one business day.", "page-contact") + f"""
@@ -1006,14 +1121,7 @@ contact = page_hero("Contact", "Contact us", "Let's talk about your goals",
             <h3>Email</h3>
             <p><a href="mailto:{EMAIL}">{EMAIL}</a></p>
           </div>
-          <div class="card reveal">
-            <h3>Phone</h3>
-            <p><a href="tel:{TEL}">{PHONE}</a></p>
-          </div>
-          <div class="card reveal">
-            <h3>Headquarters</h3>
-            <p>123 Business Street<br>Suite 100<br>Your City, Country</p>
-          </div>
+{contact_cards()}
         </aside>
       </div>
     </section>
@@ -1024,25 +1132,134 @@ write("contact.html", "Contact — TechSphire",
       contact)
 
 # --------------------------------------------------------------------------- privacy & 404
-privacy = page_hero("Privacy Policy", "Legal", "Privacy policy",
-                    "This is a starter template. Please have it reviewed so it matches your actual practices and local laws.") + f"""
+LEGAL_UPDATED = "19 October 2026"
+LEGAL_NAME = COMPANY["legal_name"]
+
+
+def legal_page(body):
+    return f"""
     <section class="section">
-      <div class="container" style="max-width:780px">
-        <h2>Information we collect</h2>
-        <p>When you contact us through this website, we collect the information you provide, such as your name, email address, phone number, company and the contents of your message.</p>
-        <h2>How we use it</h2>
-        <p>We use this information only to respond to your enquiry, provide our services and, where you have agreed, send you relevant updates. We do not sell your personal information.</p>
-        <h2>Cookies &amp; analytics</h2>
-        <p>This website does not set tracking cookies by default. If analytics tools are added, this section should describe them and how to opt out.</p>
-        <h2>Data retention &amp; security</h2>
-        <p>We keep personal information only as long as needed for the purposes above and protect it using appropriate technical and organisational measures.</p>
-        <h2>Your rights</h2>
-        <p>You may request access to, correction of or deletion of your personal information at any time by emailing <a href="mailto:{EMAIL}">{EMAIL}</a>.</p>
-        <p style="color:var(--muted)">Last updated: <span data-year>2026</span></p>
+      <div class="container prose-wrap">
+        <article class="prose">
+          <p class="legal-meta">Last updated: {LEGAL_UPDATED}</p>
+{body}
+        </article>
       </div>
     </section>
 """
-write("privacy.html", "Privacy policy — TechSphire", "How TechSphire collects, uses and protects your personal information.", privacy)
+
+
+privacy = page_hero("Privacy Policy", "Legal", "Privacy policy",
+                    f"How {LEGAL_NAME} collects, uses and protects personal information.") + legal_page(f"""
+          <p>{LEGAL_NAME} ("TechSphire", "we", "us") respects your privacy. This policy explains what personal information we collect through this website and when you engage with us, how we use it, and the choices and rights you have.</p>
+          <h2>1. Information we collect</h2>
+          <ul>
+            <li><strong>Information you provide</strong> — such as your name, work email, phone number, company, job title and the content of your message when you complete a form, subscribe to Insights or apply for a role.</li>
+            <li><strong>Information collected automatically</strong> — basic technical data such as browser type, device, pages visited and approximate location derived from IP address, used to operate and secure the website.</li>
+            <li><strong>Business contact information</strong> — details of client and partner representatives we work with in the course of providing our services.</li>
+          </ul>
+          <h2>2. How we use information</h2>
+          <ul>
+            <li>To respond to enquiries, provide proposals and deliver our services.</li>
+            <li>To send Insights and event invitations where you have subscribed or where permitted by law; you can unsubscribe at any time.</li>
+            <li>To assess job applications.</li>
+            <li>To operate, secure and improve our website and services, and to meet legal and regulatory obligations.</li>
+          </ul>
+          <h2>3. Legal bases</h2>
+          <p>Where data protection laws require a legal basis, we rely on your consent, the performance of a contract, compliance with legal obligations, or our legitimate interests in operating our business, which we balance against your rights.</p>
+          <h2>4. Sharing</h2>
+          <p>We do not sell personal information. We share it only with service providers who process it on our behalf under contract (for example hosting, email and recruitment platforms), with professional advisers, or where required by law.</p>
+          <h2>5. International transfers</h2>
+          <p>Where personal information is transferred across borders, we put appropriate safeguards in place, such as standard contractual clauses, in line with applicable law.</p>
+          <h2>6. Retention and security</h2>
+          <p>We keep personal information only for as long as necessary for the purposes described here, and protect it with appropriate technical and organisational measures including access controls and encryption.</p>
+          <h2>7. Cookies</h2>
+          <p>This website uses only the technical storage strictly necessary for it to function and does not use advertising or tracking cookies. If we introduce analytics, we will update this policy and ask for consent where required.</p>
+          <h2>8. Your rights</h2>
+          <p>Depending on where you live, you may have the right to access, correct, delete or restrict the use of your personal information, to object to processing, to data portability and to withdraw consent. To exercise these rights, contact us at <a href="mailto:{EMAIL}">{EMAIL}</a>. You may also complain to your local data protection authority.</p>
+          <h2>9. Changes and contact</h2>
+          <p>We may update this policy from time to time; the date above shows when it was last revised. Questions about this policy can be sent to <a href="mailto:{EMAIL}">{EMAIL}</a>.</p>""")
+write("privacy.html", "Privacy Policy — TechSphire", "How TechSphire collects, uses and protects your personal information.", privacy)
+
+terms = page_hero("Terms of Use", "Legal", "Terms of use",
+                  "The terms that apply to your use of this website.") + legal_page(f"""
+          <p>These terms govern your use of this website, operated by {LEGAL_NAME}. By using the website you accept them. If you do not agree, please do not use the website.</p>
+          <h2>1. Use of the website</h2>
+          <p>You may view and download content for your own information. You must not misuse the website, attempt to gain unauthorised access to it or interfere with its operation.</p>
+          <h2>2. Intellectual property</h2>
+          <p>All content on this website, including text, graphics, logos and software, is owned by or licensed to {LEGAL_NAME} and protected by intellectual property laws. Third-party trademarks mentioned belong to their respective owners and are used only to describe the platforms we work with.</p>
+          <h2>3. No professional advice</h2>
+          <p>Content on this website, including Insights articles, is provided for general information only and does not constitute professional advice. Our services are provided under separate written agreements.</p>
+          <h2>4. Accuracy and availability</h2>
+          <p>We aim to keep the website accurate and available but do not guarantee that it will be error-free or uninterrupted, and we may change content at any time.</p>
+          <h2>5. Links to other websites</h2>
+          <p>Links to third-party websites are provided for convenience. We are not responsible for their content or practices.</p>
+          <h2>6. Limitation of liability</h2>
+          <p>To the extent permitted by law, {LEGAL_NAME} is not liable for any loss arising from your use of, or reliance on, this website.</p>
+          <h2>7. Privacy</h2>
+          <p>Our <a href="privacy.html">Privacy Policy</a> explains how we handle personal information.</p>
+          <h2>8. Changes and contact</h2>
+          <p>We may update these terms from time to time. Questions can be sent to <a href="mailto:{EMAIL}">{EMAIL}</a>.</p>""")
+write("terms.html", "Terms of Use — TechSphire", "Terms of use for the TechSphire website.", terms)
+
+# --------------------------------------------------------------------------- insights
+insights = page_hero("Insights", "Insights", "Perspectives from our experts",
+                     "Practical guidance on AI, enterprise platforms, cloud and cyber security from the TechSphire team.", "page-industries") + f"""
+    <section class="section">
+      <div class="container">
+        <div class="insight-grid stagger">
+{insight_cards(ARTICLES)}
+        </div>
+      </div>
+    </section>
+{cta("Have a question for our experts?", "Tell us about your challenge and we'll connect you with the right specialist.", "Talk to an expert")}"""
+write("insights.html", "Insights — TechSphire",
+      "Expert perspectives on AI, enterprise applications, cloud and cyber security from TechSphire.", insights)
+
+for art in ARTICLES:
+    others = [o for o in ARTICLES if o is not art][:2]
+    practice = P[art["practice"]]
+    page = f"""    <section class="page-hero dark photo article-hero">
+      <div class="ph-bg" style="background-image:url(assets/img/photos/{art['image']}.webp)"></div>
+      <div class="container">
+        <div class="crumbs"><a href="index.html">Home</a> / <a href="insights.html">Insights</a> / {art['category'].replace('&', '&amp;')}</div>
+        <span class="eyebrow">{art['category'].replace('&', '&amp;')}</span>
+        <h1>{art['title']}</h1>
+        <p class="article-meta">{COMPANY['name']} Insights · {fmt_date(art['date'])} · {art['read']}</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container article-layout">
+        <article class="prose">
+          <p class="lede">{art['summary']}</p>
+{art['body']}
+        </article>
+        <aside class="article-aside">
+          <div class="aside-card">
+            <span class="eyebrow">Related service</span>
+            <h3>{practice[1]}</h3>
+            <p>{practice[2]}</p>
+            <a class="btn btn-primary" href="services.html#{practice[0]}">Explore {practice[1]}</a>
+          </div>
+          <div class="aside-card plain">
+            <h3>Talk to an expert</h3>
+            <p>Discuss how this applies to your organisation with one of our specialists.</p>
+            <a class="link-strong" href="contact.html">Contact us →</a>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section section-alt">
+      <div class="container">
+{section_head("", "More insights", center=False)}        <div class="insight-grid two stagger">
+{insight_cards(others)}
+        </div>
+      </div>
+    </section>
+"""
+    write(f"insight-{art['slug']}.html", f"{art['title']} — TechSphire Insights", art["summary"], page)
 
 notfound = f"""    <section class="section not-found">
       {SHAPES}
@@ -1058,4 +1275,10 @@ notfound = f"""    <section class="section not-found">
     </section>
 """
 write("404.html", "Page not found — TechSphire", "The page you were looking for could not be found.", notfound)
-print("built", TOTAL_SERVICES, "services")
+import datetime
+today = datetime.date.today().isoformat()
+urls = "".join(f"  <url><loc>{SITE_URL}/{'' if n == 'index.html' else n}</loc><lastmod>{today}</lastmod></url>\n"
+               for n in SITEMAP if n != "404.html")
+(ROOT / "sitemap.xml").write_text(f'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n{urls}</urlset>\n')
+(ROOT / "robots.txt").write_text(f"User-agent: *\nAllow: /\n\nSitemap: {SITE_URL}/sitemap.xml\n")
+print("built", len(SITEMAP), "pages,", TOTAL_SERVICES, "services")

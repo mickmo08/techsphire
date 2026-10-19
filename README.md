@@ -12,7 +12,8 @@ A fast, responsive, multi-page website for TechSphire, an IT services and IT con
 | `about.html` | Story, mission, values and leadership team |
 | `careers.html` | Benefits and open roles |
 | `contact.html` | Contact form and company details |
-| `privacy.html` | Starter privacy policy |
+| `insights.html`, `insight-*.html` | Insights listing and articles (content in `tools/insights.py`) |
+| `privacy.html`, `terms.html` | Privacy policy and terms of use |
 | `404.html` | Not-found page |
 
 Shared assets live in `assets/` (`css/styles.css`, `js/main.js`, `img/logo.svg`).
@@ -26,15 +27,16 @@ python3 -m http.server 8000
 
 ## Customise before going live
 
-Search and replace these placeholders across all `.html` files:
+All company details live in the `COMPANY` settings at the top of `tools/build_site.py`. Anything left empty is hidden on the site rather than shown as a placeholder:
 
-- `hello@techsphire.com`, `support@techsphire.com`, `careers@techsphire.com` — your real email addresses
-- `+1 (000) 000-0000` / `tel:+10000000000` — your phone number
-- `123 Business Street…` in `contact.html` — your office address
-- Social icons in the footer (`href="#"`) — links to your LinkedIn, X and Facebook pages
-- Leadership names and roles in `about.html`
-- Open roles in `careers.html`
-- Privacy policy text in `privacy.html` (have it reviewed for your jurisdiction)
+- `phone` / `phone_link` — shown in the top bar, footer, contact page and mobile call button
+- `address` — shown on the contact page
+- `social` — LinkedIn, X, Facebook and YouTube profile URLs (icons appear in the footer)
+- `leaders` — name, title and photo for each leader; adds a Leadership section to the About page
+- `legal_name`, emails and business hours
+- `SITE_URL` — your live domain, used for search engines, link previews and `sitemap.xml`
+
+Then rebuild with `python3 tools/build_site.py`. Also review the open roles in the careers section of the same file, and have the privacy policy and terms checked against the laws that apply to you.
 
 **Branding:** colours are defined as CSS variables at the top of `assets/css/styles.css` — change `--brand`, `--brand-hover` and `--brand-tint` to recolour every button, link and accent. 
 **Logo files** (in `assets/img/`):
@@ -57,6 +59,10 @@ python3 tools/build_site.py
 ```
 
 Don't edit the `.html` files directly — the next build overwrites them. Styles live in `assets/css/styles.css` and behaviour (slider, menus, globe, tabs) in `assets/js/main.js`.
+
+**Insights:** articles live in `tools/insights.py`. Add a new entry at the top of the list and rebuild — the listing page, home page and article page update automatically.
+
+**Fonts and sharing:** fonts are self-hosted in `assets/fonts/` (no third-party requests). `assets/img/og-image.png` is the preview image shown when the site is shared on LinkedIn, WhatsApp or email.
 
 **Photos:** stock photos in `assets/img/photos/` come from [Unsplash](https://unsplash.com/license) (free for commercial use, no attribution required). Replace them with your own office and team photos where you can — keep the same file names, or update the names in `tools/build_site.py`.
 

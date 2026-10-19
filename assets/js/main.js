@@ -156,7 +156,7 @@
       ctx.save();
       ctx.translate(c, c);
       ctx.rotate(-0.42);
-      ctx.strokeStyle = "rgba(165,180,252,0.28)";
+      ctx.strokeStyle = "rgba(147,197,253,0.28)";
       ctx.lineWidth = 1.2;
       ctx.beginPath();
       ctx.ellipse(0, 0, R * 1.24, R * 0.36, 0, 0, Math.PI * 2);
@@ -174,7 +174,7 @@
         const [x, y, z] = project(p, cr, sr);
         const depth = (z + 1) / 2;
         const k = (x + 1) / 2;
-        ctx.fillStyle = `rgba(${Math.round(129 - 115 * k)},${Math.round(140 + 25 * k)},${Math.round(248 - 15 * k)},${0.12 + depth * 0.88})`;
+        ctx.fillStyle = `rgba(${Math.round(59 - 45 * k)},${Math.round(130 + 35 * k)},${Math.round(246 - 13 * k)},${0.12 + depth * 0.88})`;
         ctx.beginPath();
         ctx.arc(c + x * R, c + y * R, (0.7 + depth * 1.9) * s * 1.6, 0, Math.PI * 2);
         ctx.fill();
