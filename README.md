@@ -27,15 +27,15 @@ python3 -m http.server 8000
 
 Search and replace these placeholders across all `.html` files:
 
-- `hello@techsphire.com`, `careers@techsphire.com` — your real email addresses
+- `hello@techsphire.com`, `support@techsphire.com`, `careers@techsphire.com` — your real email addresses
 - `+1 (000) 000-0000` / `tel:+10000000000` — your phone number
 - `123 Business Street…` in `contact.html` — your office address
-- `https://www.linkedin.com/` in the footer — your social profiles
+- Social icons in the footer (`href="#"`) — links to your LinkedIn, X and Facebook pages
 - Leadership names and roles in `about.html`
 - Open roles in `careers.html`
 - Privacy policy text in `privacy.html` (have it reviewed for your jurisdiction)
 
-**Branding:** colours are defined as CSS variables at the top of `assets/css/styles.css` (`--brand`, `--brand-2`, …). Replace `assets/img/logo.svg` with your own logo.
+**Branding:** colours are defined as CSS variables at the top of `assets/css/styles.css` — change `--brand`, `--brand-hover` and `--brand-tint` to recolour every button, link and accent. Replace `assets/img/logo.svg` with your own logo.
 
 **Header/footer:** these are repeated in each page, so update every `.html` file when you change navigation or footer links.
 

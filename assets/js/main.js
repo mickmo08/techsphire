@@ -18,6 +18,14 @@
     });
   }
 
+  // Header shadow once the page is scrolled
+  const header = document.querySelector(".site-header");
+  if (header) {
+    const onScroll = () => header.classList.toggle("scrolled", window.scrollY > 8);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+  }
+
   // Reveal elements as they scroll into view
   const revealEls = document.querySelectorAll(".reveal");
   if ("IntersectionObserver" in window) {
