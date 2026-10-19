@@ -1,13 +1,13 @@
 # TechSphire website
 
-A fast, responsive, multi-page website for TechSphire, an ICT (information and communication technology) company, built with plain HTML, CSS and JavaScript — no build step or dependencies.
+A fast, responsive, multi-page website for TechSphire, an IT services and IT consulting company, built with plain HTML, CSS and JavaScript — no build step or dependencies.
 
 ## Pages
 
 | File | Purpose |
 | --- | --- |
 | `index.html` | Home — hero, services overview, why us, process, technologies, FAQ |
-| `services.html` | Detailed service descriptions (linkable sections, e.g. `services.html#cloud`) |
+| `services.html` | Detailed service descriptions (linkable sections, e.g. `services.html#consulting`) |
 | `about.html` | Story, mission, values and leadership team |
 | `careers.html` | Benefits and open roles |
 | `contact.html` | Contact form and company details |
