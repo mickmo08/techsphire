@@ -1,6 +1,6 @@
 # TechSphire website
 
-A fast, responsive, multi-page website for TechSphire, an ICT (information and communication technology) company built with plain HTML, CSS and JavaScript — no build step or dependencies.
+A fast, responsive, multi-page website for TechSphire, an ICT (information and communication technology) company, built with plain HTML, CSS and JavaScript — no build step or dependencies.
 
 ## Pages
 
