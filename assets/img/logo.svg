@@ -1,12 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
-  <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#4f46e5"/>
-      <stop offset="1" stop-color="#06b6d4"/>
-    </linearGradient>
-  </defs>
-  <circle cx="32" cy="32" r="28" fill="url(#g)"/>
-  <ellipse cx="32" cy="32" rx="28" ry="10" stroke="#fff" stroke-opacity=".55" stroke-width="2.5"/>
-  <ellipse cx="32" cy="32" rx="11" ry="28" stroke="#fff" stroke-opacity=".55" stroke-width="2.5"/>
-  <circle cx="46" cy="18" r="5" fill="#fff"/>
+  <title>TechSphire</title>
+  <defs><clipPath id="ts-clip"><circle cx="32" cy="32" r="29"/></clipPath></defs>
+  <g clip-path="url(#ts-clip)"><g transform="rotate(-24 32 32)"><rect x="-14" y="-8" width="92" height="24.67" fill="#818cf8"/><rect x="-14" y="21.67" width="92" height="24.67" fill="#4f46e5"/><rect x="-14" y="51.33" width="92" height="24.67" fill="#0ea5e9"/></g></g>
 </svg>

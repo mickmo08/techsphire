@@ -35,7 +35,18 @@ Search and replace these placeholders across all `.html` files:
 - Open roles in `careers.html`
 - Privacy policy text in `privacy.html` (have it reviewed for your jurisdiction)
 
-**Branding:** colours are defined as CSS variables at the top of `assets/css/styles.css` — change `--brand`, `--brand-hover` and `--brand-tint` to recolour every button, link and accent. Replace `assets/img/logo.svg` with your own logo.
+**Branding:** colours are defined as CSS variables at the top of `assets/css/styles.css` — change `--brand`, `--brand-hover` and `--brand-tint` to recolour every button, link and accent. 
+**Logo files** (in `assets/img/`):
+
+| File | Use |
+| --- | --- |
+| `logo.svg` | Icon only — website header, favicon, social avatars |
+| `logo-full.svg` | Icon + name, for light backgrounds (documents, email signatures) |
+| `logo-full-white.svg` | Icon + name, for dark backgrounds |
+| `logo-512.png` | High-resolution icon (transparent) for profiles and apps |
+| `apple-touch-icon.png` | Home-screen icon on phones |
+
+The full logos use the Inter font; for print, open them in a design tool and convert the text to outlines.
 
 **Header/footer:** these are repeated in each page, so update every `.html` file when you change navigation or footer links.
 
