@@ -6,8 +6,9 @@ A fast, responsive, multi-page website for TechSphire, an IT services and IT con
 
 | File | Purpose |
 | --- | --- |
-| `index.html` | Home — hero, services overview, why us, process, technologies, FAQ |
-| `services.html` | Detailed service descriptions (linkable sections, e.g. `services.html#consulting`) |
+| `index.html` | Home — hero with animated globe, practice areas, platforms, industries, assessment, engagement process, FAQ |
+| `services.html` | Full service catalog: 10 practice areas, 47 services (each linkable, e.g. `services.html#generative-ai`) |
+| `industries.html` | Industries served, with focus areas for each |
 | `about.html` | Story, mission, values and leadership team |
 | `careers.html` | Benefits and open roles |
 | `contact.html` | Contact form and company details |
@@ -49,7 +50,7 @@ Search and replace these placeholders across all `.html` files:
 
 The full logos use the Inter font; for print, open them in a design tool and convert the text to outlines.
 
-**Header/footer:** these are repeated in each page, so update every `.html` file when you change navigation or footer links.
+**Header/footer:** the header (including the Services mega menu) and footer are repeated in each page, so update every `.html` file when you change navigation or footer links.
 
 ## Contact form
 
