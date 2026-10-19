@@ -132,7 +132,7 @@ p { margin: 0 0 1em; }
   letter-spacing: -0.02em;
 }
 .logo:hover { text-decoration: none; }
-.logo img { width: 34px; height: 34px; }
+.logo img { width: 38px; height: 38px; }
 .logo b { color: var(--brand); font-weight: inherit; }
 
 .nav-links {

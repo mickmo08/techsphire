@@ -40,7 +40,8 @@ Search and replace these placeholders across all `.html` files:
 
 | File | Use |
 | --- | --- |
-| `logo.svg` | Icon only — website header, favicon, social avatars |
+| `logo.svg` | Icon only, detailed — large uses (presentations, signage, social avatars) |
+| `logo-small.svg` | Icon only, bolder dots — small sizes (website header, browser tab icon) |
 | `logo-full.svg` | Icon + name, for light backgrounds (documents, email signatures) |
 | `logo-full-white.svg` | Icon + name, for dark backgrounds |
 | `logo-512.png` | High-resolution icon (transparent) for profiles and apps |
